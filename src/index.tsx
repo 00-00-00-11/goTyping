@@ -1,4 +1,5 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
+import { Timer } from "./Timer";
 
 interface GoBlinkProps {
   prefix?: string;
@@ -11,7 +12,6 @@ interface GoBlinkProps {
   typeNextCharacterDuration?: number;
   waitBeforeUntypingDuration?: number;
   untypeNextCharacterDuration?: number;
-  debug?: boolean;
 }
 
 const GoBlink = ({
@@ -25,96 +25,106 @@ const GoBlink = ({
   typeNextCharacterDuration = 50,
   waitBeforeUntypingDuration = 200,
   untypeNextCharacterDuration = 50,
-  debug = false,
 }: GoBlinkProps) => {
   const [cursorVisibility, setCursorVisiblity] = useState<boolean>(false);
   const [currentMessageIndex, setCurrentMessageIndex] = useState<number>(0);
   const [currentCharacterIndex, setCurrentCharacterIndex] = useState<number>(0);
+  const [boundingBoxHeight, setBoundingBoxHeight] = useState<number>(0);
+  const messageRefs = useRef<HTMLSpanElement[] | null[]>([]);
 
   /**
-   * Interval for controlling cursor blink.
+   * Event loop for controlling the cursor blink, as well as the
+   * animation loop for controlling the height of the element,
+   * by calculating the max height of the "messages"
    */
   useEffect(() => {
-    let timeout: ReturnType<typeof setTimeout>;
+    const timer = new Timer();
+    let animationFrame: ReturnType<typeof requestAnimationFrame>
 
-    const makeCursorVisible = () => {
-      setCursorVisiblity(true);
-      timeout = setTimeout(makeCursorInvisible, cursorOnDuration);
+    const eventLoop = async () => {
+      try {
+        while (true) {
+          await timer.wait(cursorOnDuration);
+          setCursorVisiblity(false);
+          await timer.wait(cursorOffDuration);
+          setCursorVisiblity(true);
+        }
+      } catch {
+        // Cancelled!
+      }
     };
 
-    const makeCursorInvisible = () => {
-      setCursorVisiblity(false);
-      timeout = setTimeout(makeCursorVisible, cursorOffDuration);
-    };
+    const animationLoop = () => {
+      let maxHeight = 0;
 
-    makeCursorVisible();
+      for (const ref of messageRefs.current.values()) {
+        if (ref) {
+          const height = ref.getBoundingClientRect().height
+          if (height > maxHeight) maxHeight = height
+        }
+      }
+
+      setBoundingBoxHeight(maxHeight);
+
+      animationFrame = requestAnimationFrame(animationLoop);
+    }
+
+    eventLoop();
+    animationLoop();
 
     return () => {
-      clearTimeout(timeout);
+      timer.cancelAll();
+      cancelAnimationFrame(animationFrame)
     };
   }, []);
 
-  // Only start controlling _if_ there are any messages!
-  if (messages.length) {
-    /**
-     * Interval for controlling the text
-     */
-    useEffect(() => {
-      let timeout: ReturnType<typeof setTimeout>;
+  /**
+   * Event loop for controlling the characters appearing/disappearing
+   */
+  useEffect(() => {
+    const timer = new Timer();
 
-      const waitBeforeTyping = () => {
-        // Start off by waiting until we should start typing
-        timeout = setTimeout(typeNextCharacter, waitBeforeTypingDuration);
-      };
+    const eventLoop = async () => {
+      let mi = 0;
+      let ci = 0;
 
-      const typeNextCharacter = () => {
-        // Grab the current string
-        const currentString = messages[currentMessageIndex];
+      try {
+        while (true) {
+          for (mi = 0; mi < messages.length; mi++) {
+            setCurrentMessageIndex(mi);
 
-        setCurrentCharacterIndex((val) => {
-          if (val < currentString.length) {
-            timeout = setTimeout(typeNextCharacter, typeNextCharacterDuration);
-            return val + 1;
-          } else {
-            timeout = setTimeout(waitBeforeUntyping, typeNextCharacterDuration);
-            return val;
+            await timer.wait(waitBeforeTypingDuration);
+
+            for (ci = 0; ci <= messages[mi].length; ci++) {
+              await timer.wait(typeNextCharacterDuration);
+              setCurrentCharacterIndex(ci);
+            }
+
+            await timer.wait(waitBeforeUntypingDuration);
+
+            for (ci = messages[mi].length; ci >= 0; ci--) {
+              await timer.wait(untypeNextCharacterDuration);
+              setCurrentCharacterIndex(ci);
+            }
           }
-        });
-      };
+        }
+      } catch {
+        // Cancelled!
+      }
+    };
 
-      const waitBeforeUntyping = () => {
-        timeout = setTimeout(untypeNextCharacter, waitBeforeUntypingDuration);
-      };
+    eventLoop();
 
-      const untypeNextCharacter = () => {
-        setCurrentCharacterIndex((val) => {
-          if (val > 0) {
-            timeout = setTimeout(
-              untypeNextCharacter,
-              untypeNextCharacterDuration
-            );
-            return val - 1;
-          } else {
-            // We've finished removing the word; we can move on to the next word!
-            setCurrentMessageIndex((val) => (val + 1) % messages.length);
+    return () => {
+      timer.cancelAll();
+    };
+  }, [messages]);
 
-            // Wait until we start typing again.
-            waitBeforeTyping();
-            return val;
-          }
-        });
-      };
-
-      waitBeforeTyping();
-
-      return () => {
-        clearTimeout(timeout);
-      };
-    }, []);
-  }
 
   return (
-    <div>
+    <div style={{
+      height: `${boundingBoxHeight}px`
+    }}>
       <span
         style={{
           position: "relative",
@@ -123,44 +133,57 @@ const GoBlink = ({
       >
         {messages.map((message, messageIndex) => {
           const wordVisible = currentMessageIndex === messageIndex;
+
+          // Turn all the characters into a span
+          const characters: ReactNode[] = message.split("").map((char, charIndex) => (
+            <span
+              key={charIndex}
+              style={{
+                visibility:
+                  wordVisible && charIndex < currentCharacterIndex
+                    ? undefined
+                    : "hidden",
+              }}
+            >
+              {char}
+            </span>
+          ));
+
+          // Insert a cursor is we're on the current word
+          if (wordVisible) {
+            // Insert the cursor and suffix into the correct position,
+            // deleting 0 characters in the process
+            characters.splice(
+              currentCharacterIndex,
+              0,
+              <span
+                key="cursor"
+                style={{
+                  visibility: cursorVisibility ? undefined : "hidden",
+                }}
+              >
+                {cursor}
+              </span>,
+              suffix && <span>
+                {" "}{suffix}
+              </span>
+            );
+          }
+
           return (
             <span
               key={messageIndex}
+              ref={(el) => (messageRefs.current[messageIndex] = el)}
               style={{
-                visibility: wordVisible ? "visible" : "hidden",
+                visibility: wordVisible ? undefined : "hidden",
                 position: "absolute",
               }}
             >
-              <span>{prefix}</span>{" "}
-              {message.split("").map((char, charIndex) => {
-                const charVisible =
-                  wordVisible && charIndex < currentCharacterIndex;
-                const lastChar = charIndex === currentCharacterIndex - 1;
-
-                return (
-                  <span
-                    key={charIndex}
-                    style={{
-                      visibility: charVisible ? "visible" : "hidden",
-                    }}
-                  >
-                    {char}
-                    {
-                      lastChar && cursor
-                    }
-                  </span>
-                );
-              })}{" "}
-              <span>{suffix}</span>
+              {prefix && <span>{prefix}</span>} {characters}
             </span>
           );
         })}
       </span>
-      <p>
-        Statistics!<br />
-        Char: {currentCharacterIndex} / {messages[currentMessageIndex].length} <br />
-        String: {messages[currentMessageIndex]} {currentMessageIndex}<br/>
-      </p>
     </div>
   );
 };
