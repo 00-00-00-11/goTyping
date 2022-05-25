@@ -2,15 +2,51 @@ import React from 'react';
 import { GoBlink } from "../src";
 import * as ReactDOM from "react-dom/client";
 
+const text = [
+  "Cloud Hosting",
+  "Digital Media\n& Broadcasting",
+  "Web Hosting",
+  "Domain Services",
+  "Web Development",
+  "Disaster Recovery",
+  "Network Security",
+  "Global Networking",
+  "Web-App Development",
+  "On-Site IT Solutions",
+  "Cloud Services",
+  "Telecommunications",
+  "Cloud Networking",
+  "Web Security",
+  "goSystem",
+];
+
 const Page = () => (
   <div>
     <div>
-    <GoBlink
-      prefix="We are'nt"
-      messages={["Digital Media Broadcasting Services", "goSystem Solutions Limited"]}
-      suffix="suffix"
-      debug
-    />
+      <GoBlink
+        prefix="We are"
+        messages={text}
+      />
+      <GoBlink
+        prefix="We are"
+        messages={text}
+      />
+      <GoBlink
+        prefix="We are"
+        messages={text}
+      />
+      <GoBlink
+        prefix="We are"
+        messages={text}
+      />
+      <GoBlink
+        prefix="We are"
+        messages={text}
+      />
+      <GoBlink
+        prefix="We are"
+        messages={text}
+      />
     </div>
     <p>
       The quick brown fox jumps over the lazy dog.
