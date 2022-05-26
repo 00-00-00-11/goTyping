@@ -2,16 +2,67 @@ import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { Timer } from "./Timer";
 
 interface GoBlinkProps {
+  /**
+   * The string that appears before each of the messages
+   * @default "" The prefix
+   */
   prefix?: string;
+
+  /**
+   * The string that appears after the message, and also the cursor
+   * @default "" The suffix
+   */
   suffix?: string;
+
+  /**
+   * The character(s) that represents the blinking cursor
+   * @default "|" The cursor string
+   */
   cursor?: string;
+
+  /**
+   * An array of strings for each of the messages
+   * @default [] The array of strings
+   */
   messages: string[];
+
+  /**
+   * The duration of time, in milliseconds that the cursor should be visible for
+   * @default 500
+   */
   cursorOnDuration?: number;
+
+  /**
+   * The duration of time, in milliseconds that the cursor should be invisible for
+   * @default 500
+   */
   cursorOffDuration?: number;
+
+  /**
+   * The duration of time, in milliseconds that should elapse, while there is no text
+   * displayed, before the typing animation begins
+   * @default 200
+   */
   waitBeforeTypingDuration?: number;
+
+  /**
+   * The duration of time, in milliseconds that should elapse, for each character to be typed
+   * @default 50
+   */
   typeNextCharacterDuration?: number;
-  waitBeforeUntypingDuration?: number;
-  untypeNextCharacterDuration?: number;
+
+  /**
+   * The duration of time, in milliseconds that should elapse, while the text is
+   * displayed, before the untyping/erasing animation begins
+   * @default 200
+   */
+  waitBeforeErasingDuration?: number;
+
+  /**
+   * The duration of time, in milliseconds that should elapse, for each character to be untyped/erased
+   * @default 50
+   */
+  eraseNextCharacterDuration?: number;
 }
 
 const GoBlink = ({
@@ -23,8 +74,8 @@ const GoBlink = ({
   cursorOffDuration = 500,
   waitBeforeTypingDuration = 200,
   typeNextCharacterDuration = 50,
-  waitBeforeUntypingDuration = 200,
-  untypeNextCharacterDuration = 50,
+  waitBeforeErasingDuration = 200,
+  eraseNextCharacterDuration = 50,
 }: GoBlinkProps) => {
   const [cursorVisibility, setCursorVisiblity] = useState<boolean>(false);
   const [currentMessageIndex, setCurrentMessageIndex] = useState<number>(0);
@@ -39,7 +90,7 @@ const GoBlink = ({
    */
   useEffect(() => {
     const timer = new Timer();
-    let animationFrame: ReturnType<typeof requestAnimationFrame>
+    let animationFrame: ReturnType<typeof requestAnimationFrame>;
 
     const eventLoop = async () => {
       try {
@@ -59,22 +110,22 @@ const GoBlink = ({
 
       for (const ref of messageRefs.current.values()) {
         if (ref) {
-          const height = ref.getBoundingClientRect().height
-          if (height > maxHeight) maxHeight = height
+          const height = ref.getBoundingClientRect().height;
+          if (height > maxHeight) maxHeight = height;
         }
       }
 
       setBoundingBoxHeight(maxHeight);
 
       animationFrame = requestAnimationFrame(animationLoop);
-    }
+    };
 
     eventLoop();
     animationLoop();
 
     return () => {
       timer.cancelAll();
-      cancelAnimationFrame(animationFrame)
+      cancelAnimationFrame(animationFrame);
     };
   }, []);
 
@@ -100,10 +151,10 @@ const GoBlink = ({
               setCurrentCharacterIndex(ci);
             }
 
-            await timer.wait(waitBeforeUntypingDuration);
+            await timer.wait(waitBeforeErasingDuration);
 
             for (ci = messages[mi].length; ci >= 0; ci--) {
-              await timer.wait(untypeNextCharacterDuration);
+              await timer.wait(eraseNextCharacterDuration);
               setCurrentCharacterIndex(ci);
             }
           }
@@ -120,11 +171,12 @@ const GoBlink = ({
     };
   }, [messages]);
 
-
   return (
-    <div style={{
-      height: `${boundingBoxHeight}px`
-    }}>
+    <div
+      style={{
+        height: `${boundingBoxHeight}px`,
+      }}
+    >
       <span
         style={{
           position: "relative",
@@ -135,19 +187,21 @@ const GoBlink = ({
           const wordVisible = currentMessageIndex === messageIndex;
 
           // Turn all the characters into a span
-          const characters: ReactNode[] = message.split("").map((char, charIndex) => (
-            <span
-              key={charIndex}
-              style={{
-                visibility:
-                  wordVisible && charIndex < currentCharacterIndex
-                    ? undefined
-                    : "hidden",
-              }}
-            >
-              {char}
-            </span>
-          ));
+          const characters: ReactNode[] = message
+            .split("")
+            .map((char, charIndex) => (
+              <span
+                key={charIndex}
+                style={{
+                  visibility:
+                    wordVisible && charIndex < currentCharacterIndex
+                      ? undefined
+                      : "hidden",
+                }}
+              >
+                {char}
+              </span>
+            ));
 
           // Insert a cursor is we're on the current word
           if (wordVisible) {
@@ -164,9 +218,7 @@ const GoBlink = ({
               >
                 {cursor}
               </span>,
-              suffix && <span>
-                {" "}{suffix}
-              </span>
+              suffix && <span> {suffix}</span>
             );
           }
 

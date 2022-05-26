@@ -1,56 +1,24 @@
-import React from 'react';
+import React from "react";
 import { GoBlink } from "../src";
 import * as ReactDOM from "react-dom/client";
 
-const text = [
-  "Cloud Hosting",
-  "Digital Media\n& Broadcasting",
-  "Web Hosting",
-  "Domain Services",
-  "Web Development",
-  "Disaster Recovery",
-  "Network Security",
-  "Global Networking",
-  "Web-App Development",
-  "On-Site IT Solutions",
-  "Cloud Services",
-  "Telecommunications",
-  "Cloud Networking",
-  "Web Security",
-  "goSystem",
-];
-
 const Page = () => (
-  <div>
-    <div>
-      <GoBlink
-        prefix="We are"
-        messages={text}
-      />
-      <GoBlink
-        prefix="We are"
-        messages={text}
-      />
-      <GoBlink
-        prefix="We are"
-        messages={text}
-      />
-      <GoBlink
-        prefix="We are"
-        messages={text}
-      />
-      <GoBlink
-        prefix="We are"
-        messages={text}
-      />
-      <GoBlink
-        prefix="We are"
-        messages={text}
-      />
-    </div>
-    <p>
-      The quick brown fox jumps over the lazy dog.
-    </p>
+  <div
+    style={{
+      width: "200px",
+      border: "solid",
+    }}
+  >
+    <h1>Example Page</h1>
+    <GoBlink
+      prefix="Welcome to"
+      messages={[
+        "the house of fun",
+        "the United Kingdom",
+        "Greggs",
+        "Crossrail, also known as the Elizabeth Line",
+      ]}
+    />
   </div>
 );
 

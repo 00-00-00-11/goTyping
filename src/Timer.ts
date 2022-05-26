@@ -1,5 +1,6 @@
 class Timer {
-  private timeouts: Map<ReturnType<typeof setTimeout>, ((reason: any) => void)> = new Map();
+  private timeouts: Map<ReturnType<typeof setTimeout>, (reason: any) => void> =
+    new Map();
 
   wait(time: number) {
     return new Promise<void>((resolve, reject) => {
@@ -9,11 +10,11 @@ class Timer {
 
         // Resolve the promise
         resolve();
-      }, time)
+      }, time);
 
       // Add the promise to the set of promises
-      this.timeouts.set(timeout, reject)
-    })
+      this.timeouts.set(timeout, reject);
+    });
   }
 
   cancelAll() {
@@ -25,4 +26,4 @@ class Timer {
   }
 }
 
-export { Timer }
+export { Timer };
