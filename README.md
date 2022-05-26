@@ -2,6 +2,14 @@
 
 A ReactJS component for generating typing animations, by goSystem Solutions Limited.
 
+## Motivation
+
+goTyping preempts and sets the maximum size of the component, to ensure that the entire message fits within the component, and does not cause the component to enlarge/overflow at any point.
+
+## Installation
+
+Install the `gotyping` module, with `yarn add gotyping` or `npm i --save gotyping`.
+
 ## Usage
 
 ```tsx
@@ -12,8 +20,6 @@ A ReactJS component for generating typing animations, by goSystem Solutions Limi
   "Crossrail, also known as the Elizabeth Line",
 ]} />
 ```
-
-![An animation of the above code](./.github/firefox_GIEl31qpxt.gif)
 
 ## Props
 
