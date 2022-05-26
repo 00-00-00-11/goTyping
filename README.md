@@ -2,8 +2,6 @@
 
 A ReactJS component for generating typing animations, by goSystem Solutions Limited.
 
-![goSystem New Experience](./.github/firefox_IMCLBMHyPO.gif)
-
 ## Usage
 
 ```tsx
