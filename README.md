@@ -2,6 +2,8 @@
 
 A ReactJS component for generating typing animations, by goSystem Solutions Limited.
 
+![An animation of the above code](./.github/firefox_GIEl31qpxt.gif)
+
 ## Motivation
 
 goTyping preempts and sets the maximum size of the component, to ensure that the entire message fits within the component, and does not cause the component to enlarge/overflow at any point.
