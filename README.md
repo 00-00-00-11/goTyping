@@ -15,7 +15,7 @@ Install the `gotyping` module, with `yarn add gotyping` or `npm i --save gotypin
 ## Usage
 
 ```tsx
-<GoBlink prefix="Welcome to" messages={[
+<GoTyping prefix="Welcome to" messages={[
   "the house of fun",
   "the United Kingdom",
   "Greggs",
@@ -26,7 +26,7 @@ Install the `gotyping` module, with `yarn add gotyping` or `npm i --save gotypin
 ## Props
 
 ```ts
-interface GoBlinkProps {
+interface GoTypingProps {
   /**
    * The string that appears before each of the messages
    * @default "" The prefix

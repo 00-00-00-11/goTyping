@@ -1,5 +1,5 @@
 import React from "react";
-import { GoBlink } from "../src";
+import { GoTyping } from "../src";
 import * as ReactDOM from "react-dom/client";
 
 const Page = () => (
@@ -10,7 +10,7 @@ const Page = () => (
     }}
   >
     <h1>Example Page</h1>
-    <GoBlink
+    <GoTyping
       prefix="Welcome to"
       messages={[
         "the house of fun",

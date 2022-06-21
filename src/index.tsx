@@ -1,7 +1,7 @@
 import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { Timer } from "./Timer";
 
-interface GoBlinkProps {
+interface GoTypingProps {
   /**
    * The string that appears before each of the messages
    * @default "" The prefix
@@ -65,7 +65,7 @@ interface GoBlinkProps {
   eraseNextCharacterDuration?: number;
 }
 
-const GoBlink = ({
+const GoTyping = ({
   prefix = "",
   suffix = "",
   cursor = "|",
@@ -76,7 +76,7 @@ const GoBlink = ({
   typeNextCharacterDuration = 50,
   waitBeforeErasingDuration = 200,
   eraseNextCharacterDuration = 50,
-}: GoBlinkProps) => {
+}: GoTypingProps) => {
   const [cursorVisibility, setCursorVisiblity] = useState<boolean>(false);
   const [currentMessageIndex, setCurrentMessageIndex] = useState<number>(0);
   const [currentCharacterIndex, setCurrentCharacterIndex] = useState<number>(0);
@@ -240,5 +240,5 @@ const GoBlink = ({
   );
 };
 
-export { GoBlink };
-export type { GoBlinkProps };
+export { GoTyping, GoTyping as GoBlink };
+export type { GoTypingProps };
